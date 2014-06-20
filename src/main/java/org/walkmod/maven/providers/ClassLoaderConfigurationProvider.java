@@ -23,8 +23,10 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jboss.shrinkwrap.resolver.api.Resolvers;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenResolvedArtifact;
+import org.jboss.shrinkwrap.resolver.api.maven.MavenResolverSystem;
 import org.jboss.shrinkwrap.resolver.api.maven.ScopeType;
 import org.walkmod.conf.ConfigurationException;
 import org.walkmod.conf.ConfigurationProvider;
@@ -37,6 +39,9 @@ public class ClassLoaderConfigurationProvider implements ConfigurationProvider {
 	private List<String> classPathEntries = new LinkedList<String>();
 
 	private Configuration configuration;
+
+	private ClassLoader classLoader = Thread.currentThread()
+			.getContextClassLoader();
 
 	public ClassLoaderConfigurationProvider() {
 		this(new File("pom.xml"));
@@ -52,7 +57,8 @@ public class ClassLoaderConfigurationProvider implements ConfigurationProvider {
 		if (pomFile != null) {
 			if (pomFile.exists()) {
 
-				MavenResolvedArtifact[] artifacts = Maven.resolver()
+				MavenResolvedArtifact[] artifacts = Resolvers
+						.use(MavenResolverSystem.class, classLoader)
 						.loadPomFromFile(getPomFile())
 						.importDependencies(ScopeType.COMPILE, ScopeType.TEST)
 						.resolve().withTransitivity().asResolvedArtifact();
@@ -87,7 +93,9 @@ public class ClassLoaderConfigurationProvider implements ConfigurationProvider {
 	@Override
 	public void load() throws ConfigurationException {
 		if (configuration != null) {
-
+			if (configuration.getClassLoader() != null) {
+				classLoader = configuration.getClassLoader();
+			}
 			List<MavenResolvedArtifact> artifacts = resolve();
 
 			if (artifacts != null) {
