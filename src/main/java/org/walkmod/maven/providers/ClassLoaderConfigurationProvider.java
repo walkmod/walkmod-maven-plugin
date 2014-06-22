@@ -24,7 +24,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jboss.shrinkwrap.resolver.api.Resolvers;
-import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenResolvedArtifact;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenResolverSystem;
 import org.jboss.shrinkwrap.resolver.api.maven.ScopeType;
@@ -40,7 +39,7 @@ public class ClassLoaderConfigurationProvider implements ConfigurationProvider {
 
 	private Configuration configuration;
 
-	private ClassLoader classLoader = Thread.currentThread()
+	private ClassLoader cl = Thread.currentThread()
 			.getContextClassLoader();
 
 	public ClassLoaderConfigurationProvider() {
@@ -58,7 +57,7 @@ public class ClassLoaderConfigurationProvider implements ConfigurationProvider {
 			if (pomFile.exists()) {
 
 				MavenResolvedArtifact[] artifacts = Resolvers
-						.use(MavenResolverSystem.class, classLoader)
+						.use(MavenResolverSystem.class, cl)
 						.loadPomFromFile(getPomFile())
 						.importDependencies(ScopeType.COMPILE, ScopeType.TEST)
 						.resolve().withTransitivity().asResolvedArtifact();
@@ -94,7 +93,8 @@ public class ClassLoaderConfigurationProvider implements ConfigurationProvider {
 	public void load() throws ConfigurationException {
 		if (configuration != null) {
 			if (configuration.getClassLoader() != null) {
-				classLoader = configuration.getClassLoader();
+				cl = configuration.getClassLoader();
+				System.out.println("class loader resolved");
 			}
 			List<MavenResolvedArtifact> artifacts = resolve();
 
