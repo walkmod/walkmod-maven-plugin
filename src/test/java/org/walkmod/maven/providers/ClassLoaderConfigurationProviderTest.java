@@ -35,11 +35,11 @@ public class ClassLoaderConfigurationProviderTest extends TestCase {
     }
 
     @Test
-    public void testResolveShouldRetrievePomDependencies() {
+    public void testResolveShouldRetrievePomDependencies() throws Exception {
         File pom = new File("pom.xml");
         assertTrue(pom.exists());
         ClassLoaderConfigurationProvider reader = new ClassLoaderConfigurationProvider(pom);
-        List<MavenResolvedArtifact> dependencies = reader.resolve();
+        List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
         assertFalse(dependencies.isEmpty());
     }
 	
@@ -51,5 +51,6 @@ public class ClassLoaderConfigurationProviderTest extends TestCase {
     	reader.load();
     	assertNotNull(conf.getParameters().get("classLoader"));
     }
+    
 }
 
