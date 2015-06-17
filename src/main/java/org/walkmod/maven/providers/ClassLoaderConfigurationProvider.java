@@ -176,38 +176,38 @@ public class ClassLoaderConfigurationProvider implements ConfigurationProvider {
 	}
 
 	public void compile(File sourceDir, File buildDir) throws CompilerException {
+		if (sourceDir.exists()) {
+			JavacCompiler compiler = new JavacCompiler();
+			CompilerConfiguration configuration = new CompilerPluginConfiguration(
+					getParsedPomFile()).asCompilerConfiguration();
+			final Collection<MavenResolvedArtifact> artifactResults = getArtifacts();
 
-		JavacCompiler compiler = new JavacCompiler();
-		CompilerConfiguration configuration = new CompilerPluginConfiguration(
-				getParsedPomFile()).asCompilerConfiguration();
-		final Collection<MavenResolvedArtifact> artifactResults = getArtifacts();
+			for (MavenResolvedArtifact artifact : artifactResults) {
+				String classpathEntry = artifact.asFile().getAbsolutePath();
+				configuration.addClasspathEntry(classpathEntry);
 
-		for (MavenResolvedArtifact artifact : artifactResults) {
-			String classpathEntry = artifact.asFile().getAbsolutePath();
-			configuration.addClasspathEntry(classpathEntry);
-
-		}
-
-		configuration.addClasspathEntry(new File(pomFile.getParent(),
-				"target/classes").getAbsolutePath());
-		configuration.addSourceLocation(sourceDir.getAbsolutePath());
-		configuration.setOutputLocation(buildDir.getAbsolutePath());
-
-		CompilerResult result = compiler.performCompile(configuration);
-		if (!result.isSuccess()) {
-			List<CompilerMessage> messages = result.getCompilerMessages();
-			StringBuilder sb = new StringBuilder("Found ")
-					.append(messages.size())
-					.append(" problems while compiling the project")
-					.append("\n");
-
-			for (CompilerMessage problem : messages) {
-				sb.append(problem).append("\n");
 			}
 
-			throw new CompilerException(sb.toString());
-		}
+			configuration.addClasspathEntry(new File(pomFile.getParent(),
+					"target/classes").getAbsolutePath());
+			configuration.addSourceLocation(sourceDir.getAbsolutePath());
+			configuration.setOutputLocation(buildDir.getAbsolutePath());
 
+			CompilerResult result = compiler.performCompile(configuration);
+			if (!result.isSuccess()) {
+				List<CompilerMessage> messages = result.getCompilerMessages();
+				StringBuilder sb = new StringBuilder("Found ")
+						.append(messages.size())
+						.append(" problems while compiling the project")
+						.append("\n");
+
+				for (CompilerMessage problem : messages) {
+					sb.append(problem).append("\n");
+				}
+
+				throw new CompilerException(sb.toString());
+			}
+		}
 	}
 
 	public boolean isCompile() {
