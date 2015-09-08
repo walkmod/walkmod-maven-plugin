@@ -2,11 +2,15 @@ walkmod-maven-plugin
 ====================
 Raquel Pau <raquelpau@gmail.com>
 
+image:https://travis-ci.org/rpau/walkmod-maven-plugin.svg["Build Status", link="https://travis-ci.org/rpau/walkmod-maven-plugin"]
+
 Walkmod plugin to resolve the classpath of a maven project before executing a code transformation. It builds the project and resolve all its dependencies. No matter if it is a  maven module project or the classic maven project. In case of being a maven
 module, this plugin compiles and resolve the dependencies with the other modules of the same project.
 
 
 == Usage 
+
+Important, to run this plugin, you need to work with JRE 7 or higher. 
 
 Specifically, this plugin makes available the classpath of maven project for the code transformations when you run walkmod. In order to access to the project classpath (the java.lang.ClassLoader element) from your code transformation, you just need to add
 the setter operation for the class loader.
