@@ -16,26 +16,9 @@
 package org.walkmod.maven.providers;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.codehaus.plexus.compiler.CompilerConfiguration;
-import org.codehaus.plexus.compiler.CompilerException;
-import org.codehaus.plexus.compiler.CompilerMessage;
-import org.codehaus.plexus.compiler.CompilerResult;
-import org.codehaus.plexus.compiler.javac.JavacCompiler;
-import org.jboss.shrinkwrap.resolver.api.Resolvers;
-import org.jboss.shrinkwrap.resolver.api.maven.MavenResolvedArtifact;
-import org.jboss.shrinkwrap.resolver.api.maven.MavenResolverSystem;
-import org.jboss.shrinkwrap.resolver.api.maven.ScopeType;
-import org.jboss.shrinkwrap.resolver.api.maven.pom.ParsedPomFile;
-import org.jboss.shrinkwrap.resolver.impl.maven.MavenWorkingSessionImpl;
-import org.jboss.shrinkwrap.resolver.impl.maven.archive.plugins.CompilerPluginConfiguration;
 import org.walkmod.conf.ConfigurationException;
 import org.walkmod.conf.ConfigurationProvider;
 import org.walkmod.conf.entities.Configuration;
@@ -44,49 +27,31 @@ public class ClassLoaderConfigurationProvider implements ConfigurationProvider {
 
 	private File pomFile = null;
 
-	private List<String> classPathEntries = new LinkedList<String>();
-
 	private Configuration configuration;
 
 	private boolean compile = true;
 
-	private ClassLoader cl = Thread.currentThread().getContextClassLoader();
+	private ClassLoader cl;
 
-	private List<MavenResolvedArtifact> artifacts = null;
-
-	private ParsedPomFile parsedPomFile = null;
+	private LocalMavenRepository localRepo;
 
 	public ClassLoaderConfigurationProvider() {
-		this(new File("pom.xml"));
+		this(new File("pom.xml"), false, Thread.currentThread()
+				.getContextClassLoader(), null, null);
 	}
 
 	public ClassLoaderConfigurationProvider(File pomFile) {
-		setPomFile(pomFile);
-		classPathEntries.add("target/classes");
-		classPathEntries.add("target/test-classes");
+		this(pomFile, false, Thread.currentThread().getContextClassLoader(),
+				null, null);
 	}
 
-	public List<MavenResolvedArtifact> getArtifacts() {
-		if (pomFile != null) {
-			if (pomFile.exists()) {
-				if (artifacts == null) {
-					MavenResolvedArtifact[] artifacts = Resolvers
-							.use(MavenResolverSystem.class, cl)
-							.loadPomFromFile(getPomFile())
-							.importDependencies(ScopeType.COMPILE,
-									ScopeType.TEST).resolve()
-							.withTransitivity().asResolvedArtifact();
-					this.artifacts = Arrays.asList(artifacts);
-				}
-				return artifacts;
-			} else {
-				throw new ConfigurationException("The pom.xml file at ["
-						+ pomFile.getAbsolutePath() + "] does not exists");
-			}
-		} else {
-			throw new ConfigurationException("The pom.xml file is undefined");
-		}
-
+	public ClassLoaderConfigurationProvider(File pomFile, boolean buildJar,
+			ClassLoader cl, Set<MavenModule> modules,
+			Configuration configuration) {
+		setPomFile(pomFile);
+		this.cl = cl;
+		this.configuration = configuration;
+		localRepo = new LocalMavenRepository();
 	}
 
 	public File getPomFile() {
@@ -101,11 +66,7 @@ public class ClassLoaderConfigurationProvider implements ConfigurationProvider {
 	public void init(Configuration configuration) {
 		this.configuration = configuration;
 	}
-
-	public void setClassPathEntries(List<String> classPathEntries) {
-		this.classPathEntries = classPathEntries;
-	}
-
+	
 	@Override
 	public void load() throws ConfigurationException {
 		if (configuration != null) {
@@ -113,100 +74,17 @@ public class ClassLoaderConfigurationProvider implements ConfigurationProvider {
 				cl = configuration.getClassLoader();
 			}
 
-			List<MavenResolvedArtifact> artifacts = null;
+			MavenProject mvnProject = new MavenProject(pomFile,
+					new HashSet<MavenModule>(), localRepo, isCompile(), false,
+					cl);
 			try {
-				compile();
-			} catch (CompilerException e1) {
+				configuration.getParameters().put("classLoader",
+						mvnProject.resolveClassLoader());
+
+			} catch (Exception e1) {
 				throw new ConfigurationException(e1.getMessage());
 			}
-			artifacts = getArtifacts();
 
-			if (artifacts != null) {
-				URL[] classPath = new URL[artifacts.size()
-						+ classPathEntries.size()];
-				int i = 0;
-				for (MavenResolvedArtifact mra : artifacts) {
-					try {
-						classPath[i] = mra.asFile().toURI().toURL();
-					} catch (MalformedURLException e) {
-						throw new ConfigurationException(
-								"Invalid URL for the dependency "
-										+ mra.asFile().getAbsolutePath(),
-								e.getCause());
-					}
-					i++;
-				}
-				for (String entry : classPathEntries) {
-					try {
-
-						classPath[i] = new File(entry).toURI().toURL();
-
-					} catch (MalformedURLException e) {
-						throw new ConfigurationException(
-								"Invalid URL for the classpath entry "
-										+ new File(entry).getAbsolutePath(),
-								e.getCause());
-					}
-					i++;
-				}
-				URLClassLoader loader = new URLClassLoader(classPath);
-				configuration.getParameters().put("classLoader", loader);
-			}
-
-		}
-	}
-
-	public void compile() throws CompilerException {
-		if (isCompile()) {
-			ParsedPomFile pom = getParsedPomFile();
-			compile(pom.getSourceDirectory(), new File(pomFile.getParent(),
-					"target/classes"));
-			compile(pom.getTestSourceDirectory(), new File(pomFile.getParent(),
-					"target/test-classes"));
-		}
-	}
-
-	public ParsedPomFile getParsedPomFile() {
-		if (parsedPomFile == null) {
-			MavenWorkingSessionImpl session = new MavenWorkingSessionImpl();
-			session.loadPomFromFile(getPomFile());
-			parsedPomFile = session.getParsedPomFile();
-		}
-		return parsedPomFile;
-	}
-
-	public void compile(File sourceDir, File buildDir) throws CompilerException {
-		if (sourceDir.exists()) {
-			JavacCompiler compiler = new JavacCompiler();
-			CompilerConfiguration configuration = new CompilerPluginConfiguration(
-					getParsedPomFile()).asCompilerConfiguration();
-			final Collection<MavenResolvedArtifact> artifactResults = getArtifacts();
-
-			for (MavenResolvedArtifact artifact : artifactResults) {
-				String classpathEntry = artifact.asFile().getAbsolutePath();
-				configuration.addClasspathEntry(classpathEntry);
-
-			}
-
-			configuration.addClasspathEntry(new File(pomFile.getParent(),
-					"target/classes").getAbsolutePath());
-			configuration.addSourceLocation(sourceDir.getAbsolutePath());
-			configuration.setOutputLocation(buildDir.getAbsolutePath());
-
-			CompilerResult result = compiler.performCompile(configuration);
-			if (!result.isSuccess()) {
-				List<CompilerMessage> messages = result.getCompilerMessages();
-				StringBuilder sb = new StringBuilder("Found ")
-						.append(messages.size())
-						.append(" problems while compiling the project")
-						.append("\n");
-
-				for (CompilerMessage problem : messages) {
-					sb.append(problem).append("\n");
-				}
-
-				throw new CompilerException(sb.toString());
-			}
 		}
 	}
 

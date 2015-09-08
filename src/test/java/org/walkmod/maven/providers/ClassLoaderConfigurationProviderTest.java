@@ -19,28 +19,26 @@ import java.io.File;
 import java.util.List;
 
 import org.jboss.shrinkwrap.resolver.api.maven.MavenResolvedArtifact;
+import org.junit.Assert;
 import org.junit.Test;
 import org.walkmod.conf.entities.Configuration;
 import org.walkmod.conf.entities.impl.ConfigurationImpl;
-import org.walkmod.maven.providers.ClassLoaderConfigurationProvider;
 
-import junit.framework.TestCase;
-
-public class ClassLoaderConfigurationProviderTest extends TestCase {
+public class ClassLoaderConfigurationProviderTest {
 	
 
     @Test
     public void testeable() {
-        assertTrue(true);
+        Assert.assertTrue(true);
     }
 
     @Test
     public void testResolveShouldRetrievePomDependencies() throws Exception {
         File pom = new File("pom.xml");
-        assertTrue(pom.exists());
-        ClassLoaderConfigurationProvider reader = new ClassLoaderConfigurationProvider(pom);
+        Assert.assertTrue(pom.exists());
+        MavenProject reader = new MavenProject(pom);
         List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
-        assertFalse(dependencies.isEmpty());
+        Assert.assertFalse(dependencies.isEmpty());
     }
 	
     @Test
@@ -49,7 +47,17 @@ public class ClassLoaderConfigurationProviderTest extends TestCase {
     	Configuration conf = new ConfigurationImpl();
     	reader.init(conf);
     	reader.load();
-    	assertNotNull(conf.getParameters().get("classLoader"));
+    	Assert.assertNotNull(conf.getParameters().get("classLoader"));
+    }
+    
+    @Test
+    public void testClassLoaderFromModuleProject() throws Exception{
+    	 File pom = new File("src/test/sample/test/pom.xml");
+    	 Assert.assertTrue(pom.exists());
+    	 MavenProject reader = new MavenProject(pom);
+    	 reader.build();
+         List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
+         Assert.assertFalse(dependencies.isEmpty());
     }
     
 }
