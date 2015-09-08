@@ -8,8 +8,8 @@ module, this plugin compiles and resolve the dependencies with the other modules
 
 == Usage 
 
-Specifically, this plugin makes available the classpath of maven project for the code transformations when you run walkmod. In order to access to the project classpath (the java.lang.ClassLoader element) from your code transformation, you just need 
-
+Specifically, this plugin makes available the classpath of maven project for the code transformations when you run walkmod. In order to access to the project classpath (the java.lang.ClassLoader element) from your code transformation, you just need to add
+the setter operation for the class loader.
 ----
     public class MyVisitor extends VisitorSupport {
 
