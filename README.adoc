@@ -1,0 +1,40 @@
+walkmod-maven-plugin
+====================
+Raquel Pau <raquelpau@gmail.com>
+
+Walkmod plugin to resolve the classpath of a maven project before executing a code transformation. It builds the project and resolve all its dependencies. No matter if it is a  maven module project or the classic maven project. In case of being a maven
+module, this plugin compiles and resolve the dependencies with the other modules of the same project.
+
+
+== Usage 
+
+Specifically, this plugin makes available the classpath of maven project for the code transformations when you run walkmod. In order to access to the project classpath (the java.lang.ClassLoader element) from your code transformation, you just need 
+
+----
+    public class MyVisitor extends VisitorSupport {
+
+    private ClassLoader classLoader;
+
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
+	
+    public void visit(MethodCallExpr md, VisitorContext vc){
+        ...
+    }
+	
+----
+
+In order to use this plugin from a project where you would like to run walkmod, you just need the following plugin dependency in your walkmod.xml:
+
+----
+<plugin groupId="org.walkmod" artifactId="walkmod-maven-plugin" version="[1.1.1,)" />
+----
+
+== Contributing
+
+If you want to hack on this, fork it, improve it and send me a pull request.
+
+To get started using it, just clone it and call mvn install. 
+
+
