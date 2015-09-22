@@ -285,7 +285,7 @@ public class MavenProject {
 					MavenResolvedArtifact[] artifacts = mrs
 							.loadPomFromFile(pomFile)
 							.importDependencies(ScopeType.COMPILE,
-									ScopeType.TEST).resolve()
+									ScopeType.TEST, ScopeType.PROVIDED).resolve()
 							.withTransitivity().asResolvedArtifact();
 
 					this.artifacts = Arrays.asList(artifacts);
