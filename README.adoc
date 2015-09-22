@@ -6,7 +6,7 @@ Raquel Pau <raquelpau@gmail.com>
 
 image:https://travis-ci.org/rpau/walkmod-maven-plugin.svg["Build Status", link="https://travis-ci.org/rpau/walkmod-maven-plugin"]
 
-image:"https://ci.appveyor.com/api/projects/status/4oq9j48jln2j2atu?svg=true"["Build Windows Status, link="https://ci.appveyor.com/project/rpau/walkmod-maven-plugin"]
+image:https://ci.appveyor.com/api/projects/status/4oq9j48jln2j2atu?svg=true"["Build Windows Status, link="https://ci.appveyor.com/project/rpau/walkmod-maven-plugin"]
 
 Walkmod plugin to resolve the classpath of a maven project before executing a code transformation. It builds the project and resolve all its dependencies. No matter if it is a  maven module project or the classic maven project. In case of being a maven
 module, this plugin compiles and resolve the dependencies with the other modules of the same project.
