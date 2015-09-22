@@ -82,7 +82,7 @@ public class ClassLoaderConfigurationProvider implements ConfigurationProvider {
 						mvnProject.resolveClassLoader());
 
 			} catch (Exception e1) {
-				throw new ConfigurationException(e1.getMessage());
+				throw new ConfigurationException(e1.getMessage(), e1);
 			}
 
 		}

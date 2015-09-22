@@ -63,7 +63,7 @@ public class MavenProject {
 	public MavenProject(File pomFile, Set<MavenModule> modules,
 			LocalMavenRepository localRepo, boolean requiresCompilation,
 			boolean requiresJarFile, ClassLoader cl) {
-		this.pomFile = pomFile;
+		this.pomFile = new File(pomFile.getAbsolutePath());
 		this.modules = modules;
 		this.localRepo = localRepo;
 		this.pom = localRepo.getParsedPomFile(pomFile);
