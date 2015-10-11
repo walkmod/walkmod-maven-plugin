@@ -8,4 +8,7 @@
 
 	<alias name="org.walkmod:walkmod-maven-plugin:classloader-provider"
 		alias="walkmod:commons:maven" />
+
+	<alias name="org.walkmod:walkmod-maven-plugin:classloader-provider"
+		alias="org.walkmod:walkmod-maven-plugin:maven" />
 </beans>
