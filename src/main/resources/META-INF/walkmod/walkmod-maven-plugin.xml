@@ -11,7 +11,4 @@
 
 	<alias name="org.walkmod:walkmod-maven-plugin:classloader-provider"
 		alias="org.walkmod:walkmod-maven-plugin:maven" />
-
-	<bean id="org.walkmod:walkmod-maven-plugin:maven-initializer"
-		class="org.walkmod.maven.initializers.MavenInitializer" lazy-init="true" />
 </beans>
