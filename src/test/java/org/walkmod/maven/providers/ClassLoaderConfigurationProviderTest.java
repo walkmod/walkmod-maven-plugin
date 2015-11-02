@@ -25,40 +25,38 @@ import org.walkmod.conf.entities.Configuration;
 import org.walkmod.conf.entities.impl.ConfigurationImpl;
 
 public class ClassLoaderConfigurationProviderTest {
-	
 
-    @Test
-    public void testeable() {
-        Assert.assertTrue(true);
-    }
+	@Test
+	public void testeable() {
+		Assert.assertTrue(true);
+	}
 
-    @Test
-    public void testResolveShouldRetrievePomDependencies() throws Exception {
-        File pom = new File("pom.xml");
-        Assert.assertTrue(pom.exists());
-        MavenProject reader = new MavenProject(pom);
-        List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
-        Assert.assertFalse(dependencies.isEmpty());
-    }
-	
-    @Test
-    public void testClassLoaderIsSet(){
-    	ClassLoaderConfigurationProvider reader = new ClassLoaderConfigurationProvider();
-    	Configuration conf = new ConfigurationImpl();
-    	reader.init(conf);
-    	reader.load();
-    	Assert.assertNotNull(conf.getParameters().get("classLoader"));
-    }
-    
-    @Test
-    public void testClassLoaderFromModuleProject() throws Exception{
-    	 File pom = new File("src/test/sample/test/pom.xml");
-    	 Assert.assertTrue(pom.exists());
-    	 MavenProject reader = new MavenProject(pom);
-    	 reader.build();
-         List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
-         Assert.assertFalse(dependencies.isEmpty());
-    }
-    
+	@Test
+	public void testResolveShouldRetrievePomDependencies() throws Exception {
+		File pom = new File("pom.xml");
+		Assert.assertTrue(pom.exists());
+		MavenProject reader = new MavenProject(pom);
+		List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
+		Assert.assertFalse(dependencies.isEmpty());
+	}
+
+	@Test
+	public void testClassLoaderIsSet() {
+		ClassLoaderConfigurationProvider reader = new ClassLoaderConfigurationProvider();
+		Configuration conf = new ConfigurationImpl();
+		reader.init(conf);
+		reader.load();
+		Assert.assertNotNull(conf.getParameters().get("classLoader"));
+	}
+
+	@Test
+	public void testClassLoaderFromModuleProject() throws Exception {
+		File pom = new File("src/test/sample/test/pom.xml");
+		Assert.assertTrue(pom.exists());
+		MavenProject reader = new MavenProject(pom);
+		reader.build();
+		List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
+		Assert.assertFalse(dependencies.isEmpty());
+	}
+
 }
-

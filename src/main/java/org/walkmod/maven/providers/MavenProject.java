@@ -19,6 +19,7 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.classworlds.ClassWorld;
 import org.jboss.shrinkwrap.resolver.api.Resolvers;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenResolvedArtifact;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenResolverSystem;
@@ -146,10 +147,32 @@ public class MavenProject {
 	public void build() throws Exception {
 		if (requiresCompilation) {
 
-			MavenCli cli = new MavenCli();
-			cli.doMain(new String[] { "clean", "install", "-DskipTests" }, pom.getBaseDirectory().getAbsolutePath(),
-					System.out, System.err);
+			Model model = getModel();
+			Parent parent = model.getParent();
+			int code = 0;
+			ClassWorld myClassWorld = new ClassWorld("plexus.core", cl);
+			String path ="";
+			String command = "clean mvn install -DskipTests";
+			if (parent != null) {
+				String relativePath = parent.getRelativePath();
+				File aux = new File(pom.getBaseDirectory(), relativePath);
+				path = aux.getParentFile().getAbsoluteFile().getCanonicalPath();
+				String moduleName = pomFile.getParentFile().getName();
+				command = "clean install -pl "+moduleName+" -am"+ " -DskipTests";
+				String previousDir = System.getProperty("user.dir");
+				System.setProperty("user.dir", path);
+				code = MavenCli.doMain(new String[] { "clean", "install", "-pl", moduleName, "-am", "-DskipTests" },
+						myClassWorld);
+				System.setProperty("user.dir", previousDir);
 
+			} else {
+				path = pom.getBaseDirectory().getAbsolutePath();
+				code = MavenCli.doMain(new String[] { "clean", "install", "-DskipTests" }, myClassWorld);
+
+			}
+			if (code != 0) {
+				throw new Exception("Error executing: "+command+" in" + path);
+			}
 		}
 	}
 
