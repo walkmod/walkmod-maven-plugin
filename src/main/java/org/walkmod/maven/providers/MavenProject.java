@@ -29,8 +29,6 @@ import org.walkmod.conf.ConfigurationException;
 
 public class MavenProject {
 
-	private File buildDir;
-
 	private ParsedPomFile pom;
 
 	private List<MavenResolvedArtifact> artifacts;
@@ -51,7 +49,6 @@ public class MavenProject {
 		this.modules = modules;
 		this.localRepo = localRepo;
 		this.pom = localRepo.getParsedPomFile(pomFile);
-		this.buildDir = new File(pom.getBaseDirectory(), "target/classes");
 		this.cl = cl;
 		this.requiresCompilation = requiresCompilation;
 	}
