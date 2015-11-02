@@ -44,6 +44,7 @@ public class ClassLoaderConfigurationProviderTest {
 	public void testClassLoaderIsSet() {
 		ClassLoaderConfigurationProvider reader = new ClassLoaderConfigurationProvider();
 		Configuration conf = new ConfigurationImpl();
+		conf.setClassLoader(Thread.currentThread().getContextClassLoader());
 		reader.init(conf);
 		reader.load();
 		Assert.assertNotNull(conf.getParameters().get("classLoader"));
