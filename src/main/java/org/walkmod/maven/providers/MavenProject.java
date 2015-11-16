@@ -156,14 +156,21 @@ public class MavenProject {
 			if (parent != null) {
 				String relativePath = parent.getRelativePath();
 				File aux = new File(pom.getBaseDirectory(), relativePath);
+
 				path = aux.getParentFile().getAbsoluteFile().getCanonicalPath();
-				String moduleName = pomFile.getParentFile().getName();
-				command = "clean install -pl " + moduleName + " -am" + " -DskipTests";
-				String previousDir = System.getProperty("user.dir");
-				System.setProperty("user.dir", path);
-				code = MavenCli.doMain(new String[] { "clean", "install", "-pl", moduleName, "-am", "-DskipTests" },
-						myClassWorld);
-				System.setProperty("user.dir", previousDir);
+				File parentPomFile = new File(new File(path), "pom.xml");
+				if (parentPomFile.exists()) {
+					String moduleName = pomFile.getParentFile().getName();
+					command = "clean install -pl " + moduleName + " -am" + " -DskipTests";
+					String previousDir = System.getProperty("user.dir");
+					System.setProperty("user.dir", path);
+					code = MavenCli.doMain(new String[] { "clean", "install", "-pl", moduleName, "-am", "-DskipTests" },
+							myClassWorld);
+					System.setProperty("user.dir", previousDir);
+				} else {
+					path = pom.getBaseDirectory().getAbsolutePath();
+					code = MavenCli.doMain(new String[] { "clean", "install", "-DskipTests" }, myClassWorld);
+				}
 
 			} else {
 				path = pom.getBaseDirectory().getAbsolutePath();
@@ -171,7 +178,7 @@ public class MavenProject {
 
 			}
 			if (code != 0) {
-				throw new Exception("Error executing: " + command + " in" + path);
+				throw new Exception("Error executing: " + command + " in " + path);
 			}
 		}
 	}

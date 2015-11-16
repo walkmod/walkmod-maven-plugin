@@ -59,5 +59,15 @@ public class ClassLoaderConfigurationProviderTest {
 		List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
 		Assert.assertFalse(dependencies.isEmpty());
 	}
+	
+	@Test
+	public void testClassLoaderFromProjectWithParentProject() throws Exception {
+		File pom = new File("src/test/sample2/pom.xml");
+		Assert.assertTrue(pom.exists());
+		MavenProject reader = new MavenProject(pom);
+		reader.build();
+		List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
+		Assert.assertFalse(dependencies.isEmpty());
+	}
 
 }
