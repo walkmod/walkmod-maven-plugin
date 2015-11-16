@@ -151,14 +151,14 @@ public class MavenProject {
 			Parent parent = model.getParent();
 			int code = 0;
 			ClassWorld myClassWorld = new ClassWorld("plexus.core", cl);
-			String path ="";
+			String path = "";
 			String command = "clean mvn install -DskipTests";
 			if (parent != null) {
 				String relativePath = parent.getRelativePath();
 				File aux = new File(pom.getBaseDirectory(), relativePath);
 				path = aux.getParentFile().getAbsoluteFile().getCanonicalPath();
 				String moduleName = pomFile.getParentFile().getName();
-				command = "clean install -pl "+moduleName+" -am"+ " -DskipTests";
+				command = "clean install -pl " + moduleName + " -am" + " -DskipTests";
 				String previousDir = System.getProperty("user.dir");
 				System.setProperty("user.dir", path);
 				code = MavenCli.doMain(new String[] { "clean", "install", "-pl", moduleName, "-am", "-DskipTests" },
@@ -171,7 +171,7 @@ public class MavenProject {
 
 			}
 			if (code != 0) {
-				throw new Exception("Error executing: "+command+" in" + path);
+				throw new Exception("Error executing: " + command + " in" + path);
 			}
 		}
 	}
@@ -219,9 +219,10 @@ public class MavenProject {
 							cl);
 					mrs.getMavenWorkingSession().useLegacyLocalRepository(true);
 
-					MavenResolvedArtifact[] artifacts = mrs.loadPomFromFile(pomFile)
-							.importDependencies(ScopeType.COMPILE, ScopeType.TEST, ScopeType.PROVIDED).resolve()
-							.withTransitivity().asResolvedArtifact();
+					MavenResolvedArtifact[] artifacts = mrs
+							.loadPomFromFile(pomFile).importDependencies(ScopeType.COMPILE, ScopeType.TEST,
+									ScopeType.PROVIDED, ScopeType.RUNTIME)
+							.resolve().withTransitivity().asResolvedArtifact();
 
 					this.artifacts = Arrays.asList(artifacts);
 				} else {
