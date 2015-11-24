@@ -69,5 +69,16 @@ public class ClassLoaderConfigurationProviderTest {
 		List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
 		Assert.assertFalse(dependencies.isEmpty());
 	}
+	
+	@Test
+	public void testAvoidRecursiveExecutions() throws Exception {
+		File pom = new File("src/test/recursive/pom.xml");
+		ClassLoaderConfigurationProvider reader = new ClassLoaderConfigurationProvider(pom.getAbsoluteFile());
+		Configuration conf = new ConfigurationImpl();
+		conf.setClassLoader(Thread.currentThread().getContextClassLoader());
+		reader.init(conf);
+		reader.load();
+		Assert.assertNotNull(conf.getParameters().get("classLoader"));
+	}
 
 }

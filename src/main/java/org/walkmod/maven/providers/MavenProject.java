@@ -164,17 +164,17 @@ public class MavenProject {
 					command = "clean install -pl " + moduleName + " -am" + " -DskipTests";
 					String previousDir = System.getProperty("user.dir");
 					System.setProperty("user.dir", path);
-					code = MavenCli.doMain(new String[] { "clean", "install", "-pl", moduleName, "-am", "-DskipTests" },
+					code = MavenCli.doMain(new String[] { "clean", "install", "-pl", moduleName, "-am", "-DskipTests", "-DskipWalkmod" },
 							myClassWorld);
 					System.setProperty("user.dir", previousDir);
 				} else {
 					path = pom.getBaseDirectory().getAbsolutePath();
-					code = MavenCli.doMain(new String[] { "clean", "install", "-DskipTests" }, myClassWorld);
+					code = MavenCli.doMain(new String[] { "clean", "install", "-DskipTests", "-DskipWalkmod" }, myClassWorld);
 				}
 
 			} else {
 				path = pom.getBaseDirectory().getAbsolutePath();
-				code = MavenCli.doMain(new String[] { "clean", "install", "-DskipTests" }, myClassWorld);
+				code = MavenCli.doMain(new String[] { "clean", "install", "-DskipTests" , "-DskipWalkmod" }, myClassWorld);
 
 			}
 			if (code != 0) {
