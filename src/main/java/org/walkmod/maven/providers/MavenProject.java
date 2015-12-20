@@ -270,7 +270,7 @@ public class MavenProject {
 				try {
 
 					classPath[i] = new File(entry).toURI().toURL();
-					System.out.println(classPath[i]);
+					
 				} catch (MalformedURLException e) {
 					throw new ConfigurationException(
 							"Invalid URL for the classpath entry " + new File(entry).getAbsolutePath(), e.getCause());
@@ -280,7 +280,7 @@ public class MavenProject {
 			for (MavenResolvedArtifact mra : artifacts) {
 				try {
 					classPath[i] = mra.asFile().toURI().toURL();
-					System.out.println(classPath[i]);
+					
 				} catch (MalformedURLException e) {
 					throw new ConfigurationException("Invalid URL for the dependency " + mra.asFile().getAbsolutePath(),
 							e.getCause());
