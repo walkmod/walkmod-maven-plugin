@@ -164,17 +164,19 @@ public class MavenProject {
 					command = "clean install -pl " + moduleName + " -am" + " -DskipTests";
 					String previousDir = System.getProperty("user.dir");
 					System.setProperty("user.dir", path);
-					code = MavenCli.doMain(new String[] { "clean", "install", "-pl", moduleName, "-am", "-DskipTests", "-DskipWalkmod" },
-							myClassWorld);
+					code = MavenCli.doMain(new String[] { "clean", "install", "-pl", moduleName, "-am", "-DskipTests",
+							"-DskipWalkmod" }, myClassWorld);
 					System.setProperty("user.dir", previousDir);
 				} else {
 					path = pom.getBaseDirectory().getAbsolutePath();
-					code = MavenCli.doMain(new String[] { "clean", "install", "-DskipTests", "-DskipWalkmod" }, myClassWorld);
+					code = MavenCli.doMain(new String[] { "clean", "install", "-DskipTests", "-DskipWalkmod" },
+							myClassWorld);
 				}
 
 			} else {
 				path = pom.getBaseDirectory().getAbsolutePath();
-				code = MavenCli.doMain(new String[] { "clean", "install", "-DskipTests" , "-DskipWalkmod" }, myClassWorld);
+				code = MavenCli.doMain(new String[] { "clean", "install", "-DskipTests", "-DskipWalkmod" },
+						myClassWorld);
 
 			}
 			if (code != 0) {
@@ -250,33 +252,65 @@ public class MavenProject {
 		classPathEntries.add("target/classes");
 		classPathEntries.add("target/test-classes");
 
+		String[] bootPath = System.getProperties().get("sun.boot.class.path").toString()
+				.split(Character.toString(File.pathSeparatorChar));
+
 		List<MavenResolvedArtifact> artifacts = getArtifacts();
 
 		if (artifacts != null) {
-			URL[] classPath = new URL[artifacts.size() + classPathEntries.size()];
+			URL[] classPath = new URL[artifacts.size() + classPathEntries.size() + bootPath.length];
 			int i = 0;
-			for (MavenResolvedArtifact mra : artifacts) {
-				try {
-					classPath[i] = mra.asFile().toURI().toURL();
-				} catch (MalformedURLException e) {
-					throw new ConfigurationException("Invalid URL for the dependency " + mra.asFile().getAbsolutePath(),
-							e.getCause());
-				}
+			for (String lib : bootPath) {
+
+				classPath[i] = new File(lib).toURI().toURL();
+
 				i++;
 			}
 			for (String entry : classPathEntries) {
 				try {
 
 					classPath[i] = new File(entry).toURI().toURL();
-
+					System.out.println(classPath[i]);
 				} catch (MalformedURLException e) {
 					throw new ConfigurationException(
 							"Invalid URL for the classpath entry " + new File(entry).getAbsolutePath(), e.getCause());
 				}
 				i++;
 			}
+			for (MavenResolvedArtifact mra : artifacts) {
+				try {
+					classPath[i] = mra.asFile().toURI().toURL();
+					System.out.println(classPath[i]);
+				} catch (MalformedURLException e) {
+					throw new ConfigurationException("Invalid URL for the dependency " + mra.asFile().getAbsolutePath(),
+							e.getCause());
+				}
+				i++;
+			}
 
-			return new URLClassLoader(classPath);
+			return new URLClassLoader(classPath) {
+
+				@Override
+				protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+					Class<?> result = null;
+					try {
+						result = findClass(name);
+
+					} catch (Throwable e) {
+
+					}
+					if (result != null) {
+						return result;
+					}
+
+					return super.loadClass(name, resolve);
+				}
+
+				@Override
+				public Class<?> loadClass(String name) throws ClassNotFoundException {
+					return loadClass(name, false);
+				}
+			};
 		}
 		return null;
 	}
