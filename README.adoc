@@ -30,7 +30,7 @@ the setter operation for the class loader.
     public void visit(MethodCallExpr md, VisitorContext vc){
         ...
     }
-``
+```
 
 In order to use this plugin from a project where you would like to run walkmod, you just need the following configuration provider in your walkmod.xml:
 
