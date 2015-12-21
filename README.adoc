@@ -17,7 +17,8 @@ Important, to run this plugin, you need to work with JRE 7 or higher.
 
 Specifically, this plugin makes available the classpath of maven project for the code transformations when you run walkmod. In order to access to the project classpath (the java.lang.ClassLoader element) from your code transformation, you just need to add
 the setter operation for the class loader.
-----
+
+```java
     public class MyVisitor extends VisitorSupport {
 
     private ClassLoader classLoader;
@@ -29,13 +30,18 @@ the setter operation for the class loader.
     public void visit(MethodCallExpr md, VisitorContext vc){
         ...
     }
-----
+``
 
-In order to use this plugin from a project where you would like to run walkmod, you just need the following plugin dependency in your walkmod.xml:
+In order to use this plugin from a project where you would like to run walkmod, you just need the following configuration provider in your walkmod.xml:
 
-----
-<plugin groupId="org.walkmod" artifactId="walkmod-maven-plugin" version="[1.1.1,)" />
-----
+```XML
+<!DOCTYPE walkmod PUBLIC "-//WALKMOD//DTD" "http://www.walkmod.com/dtd/walkmod-1.1.dtd">
+<walkmod>
+    <conf-providers>
+        <conf-provider type="maven"/>
+    </conf-providers>
+</walkmod>
+```
 
 == Contributing
 
