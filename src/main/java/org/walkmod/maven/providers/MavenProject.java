@@ -1,5 +1,6 @@
 package org.walkmod.maven.providers;
 
+import com.google.common.base.Joiner;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -149,10 +150,10 @@ public class MavenProject {
 
 			Model model = getModel();
 			Parent parent = model.getParent();
-			int code = 0;
+			int code;
 			ClassWorld myClassWorld = new ClassWorld("plexus.core", cl);
-			String path = "";
-			String command = "clean mvn install -DskipTests";
+			String path;
+			String[] mvnArgs = {"clean", "install", "-DskipTests", "-DskipWalkmod"};
 			if (parent != null) {
 				String relativePath = parent.getRelativePath();
 				File aux = new File(pom.getBaseDirectory(), relativePath);
@@ -160,27 +161,27 @@ public class MavenProject {
 				path = aux.getParentFile().getAbsoluteFile().getCanonicalPath();
 				File parentPomFile = new File(new File(path), "pom.xml");
 				if (parentPomFile.exists()) {
-					String moduleName = pomFile.getParentFile().getName();
-					command = "clean install -pl " + moduleName + " -am" + " -DskipTests";
+					String moduleName = pom.getArtifactId();
 					String previousDir = System.getProperty("user.dir");
 					System.setProperty("user.dir", path);
-					code = MavenCli.doMain(new String[] { "clean", "install", "-pl", moduleName, "-am", "-DskipTests",
-							"-DskipWalkmod" }, myClassWorld);
+					mvnArgs = new String[] {"clean", "install", "-pl", ":" + moduleName, "-am", "-DskipTests",
+							"-DskipWalkmod"};
+					code = MavenCli.doMain(mvnArgs, myClassWorld);
 					System.setProperty("user.dir", previousDir);
 				} else {
 					path = pom.getBaseDirectory().getAbsolutePath();
-					code = MavenCli.doMain(new String[] { "clean", "install", "-DskipTests", "-DskipWalkmod" },
+					code = MavenCli.doMain(mvnArgs,
 							myClassWorld);
 				}
 
 			} else {
 				path = pom.getBaseDirectory().getAbsolutePath();
-				code = MavenCli.doMain(new String[] { "clean", "install", "-DskipTests", "-DskipWalkmod" },
+				code = MavenCli.doMain(mvnArgs,
 						myClassWorld);
 
 			}
 			if (code != 0) {
-				throw new Exception("Error executing: " + command + " in " + path);
+				throw new Exception("Error executing: mvn " + Joiner.on(" ").join(mvnArgs) + " in " + path);
 			}
 		}
 	}
