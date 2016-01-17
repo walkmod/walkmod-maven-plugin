@@ -93,14 +93,22 @@ public class ClassLoaderConfigurationProviderTest {
       }
    }
 
-	@Test
-	public void testClassLoaderFromProjectWithParentProjectInSubfolder() throws Exception {
-		File pom = new File("src/test/sample3/child/pom.xml");
-		Assert.assertTrue(pom.exists());
-		MavenProject reader = new MavenProject(pom);
-		reader.build();
-		List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
-		Assert.assertTrue(dependencies.isEmpty());
-	}
+   @Test
+   public void testClassLoaderFromProjectWithParentProjectInSubfolder() throws Exception {
+      File pom = new File("src/test/sample3/child/pom.xml");
+      Assert.assertTrue(pom.exists());
+      String aux = System.getProperty("user.dir");
+      try {
+         System.setProperty("user.dir", pom.getParentFile().getAbsolutePath());
+        
+         MavenProject reader = new MavenProject(new File("pom.xml"));
+         reader.build();
+         List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
+         Assert.assertTrue(dependencies.isEmpty());
+      } finally {
+         System.setProperty("user.dir", aux);
+
+      }
+   }
 
 }
