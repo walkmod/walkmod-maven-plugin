@@ -41,16 +41,6 @@ public class ClassLoaderConfigurationProviderTest {
    }
 
    @Test
-   public void testClassLoaderIsSet() {
-      ClassLoaderConfigurationProvider reader = new ClassLoaderConfigurationProvider();
-      Configuration conf = new ConfigurationImpl();
-      conf.setClassLoader(Thread.currentThread().getContextClassLoader());
-      reader.init(conf);
-      reader.load();
-      Assert.assertNotNull(conf.getParameters().get("classLoader"));
-   }
-
-   @Test
    public void testClassLoaderFromModuleProject() throws Exception {
       File pom = new File("src/test/sample/test/pom.xml");
       Assert.assertTrue(pom.exists());
