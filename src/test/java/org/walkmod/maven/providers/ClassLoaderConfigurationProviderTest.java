@@ -57,7 +57,7 @@ public class ClassLoaderConfigurationProviderTest {
       String aux = System.getProperty("user.dir");
       try {
          System.setProperty("user.dir", pom.getParentFile().getAbsolutePath());
-         MavenProject reader = new MavenProject(pom);
+         MavenProject reader = new MavenProject(new File("pom.xml"));
          reader.build();
          List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
          Assert.assertFalse(dependencies.isEmpty());
@@ -74,7 +74,7 @@ public class ClassLoaderConfigurationProviderTest {
       String aux = System.getProperty("user.dir");
       try {
          System.setProperty("user.dir", pom.getParentFile().getAbsolutePath());
-         MavenProject reader = new MavenProject(pom);
+         MavenProject reader = new MavenProject(new File("pom.xml"));
          reader.build();
          List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
          Assert.assertFalse(dependencies.isEmpty());
