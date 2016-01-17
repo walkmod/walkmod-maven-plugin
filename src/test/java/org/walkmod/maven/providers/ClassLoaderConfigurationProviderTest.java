@@ -89,4 +89,14 @@ public class ClassLoaderConfigurationProviderTest {
 		}
 	}
 
+	@Test
+	public void testClassLoaderFromProjectWithParentProjectInSubfolder() throws Exception {
+		File pom = new File("src/test/sample3/child/pom.xml");
+		Assert.assertTrue(pom.exists());
+		MavenProject reader = new MavenProject(pom);
+		reader.build();
+		List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
+		Assert.assertTrue(dependencies.isEmpty());
+	}
+
 }
