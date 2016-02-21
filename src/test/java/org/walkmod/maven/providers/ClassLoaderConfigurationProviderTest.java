@@ -110,5 +110,23 @@ public class ClassLoaderConfigurationProviderTest {
 
       }
    }
+   
+   @Test
+   public void testExtraMvnArgs() throws Exception{
+      File pom = new File("src/test/sample4/pom.xml");
+      Assert.assertTrue(pom.exists());
+      String aux = System.getProperty("user.dir");
+      try {
+         System.setProperty("user.dir", pom.getParentFile().getAbsolutePath());
+        
+         MavenProject reader = new MavenProject(new File("pom.xml"), "-Dversion=11.0 -Drelease=0");
+         reader.build();
+         List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
+         Assert.assertTrue(dependencies.isEmpty());
+      } finally {
+         System.setProperty("user.dir", aux);
+
+      }
+   }
 
 }

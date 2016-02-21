@@ -34,6 +34,8 @@ public class ClassLoaderConfigurationProvider implements ConfigurationProvider {
 	private ClassLoader cl;
 
 	private LocalMavenRepository localRepo;
+	
+	private String mavenArgs="";
 
 	public ClassLoaderConfigurationProvider() {
 		this(new File("pom.xml"), false, Thread.currentThread()
@@ -76,7 +78,7 @@ public class ClassLoaderConfigurationProvider implements ConfigurationProvider {
 
 			MavenProject mvnProject = new MavenProject(pomFile,
 					new HashSet<MavenModule>(), localRepo, isCompile(),
-					cl);
+					cl, mavenArgs);
 			try {
 				configuration.getParameters().put("classLoader",
 						mvnProject.resolveClassLoader());
@@ -94,6 +96,10 @@ public class ClassLoaderConfigurationProvider implements ConfigurationProvider {
 
 	public void setCompile(boolean compile) {
 		this.compile = compile;
+	}
+	
+	public void setMavenArgs(String mvnArgs){
+	   this.mavenArgs = mvnArgs;
 	}
 
 }
