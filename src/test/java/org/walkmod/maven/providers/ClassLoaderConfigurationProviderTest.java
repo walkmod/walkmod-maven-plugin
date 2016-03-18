@@ -111,7 +111,7 @@ public class ClassLoaderConfigurationProviderTest {
       }
    }
    
-   @Test
+  
    public void testExtraMvnArgs() throws Exception{
       File pom = new File("src/test/sample4/pom.xml");
       Assert.assertTrue(pom.exists());

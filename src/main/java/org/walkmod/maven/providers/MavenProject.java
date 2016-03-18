@@ -264,7 +264,7 @@ public class MavenProject {
                mrs.getMavenWorkingSession().useLegacyLocalRepository(true);
 
                MavenResolvedArtifact[] artifacts = mrs.loadPomFromFile(pomFile)
-                     .importDependencies(ScopeType.COMPILE, ScopeType.TEST, ScopeType.PROVIDED, ScopeType.RUNTIME)
+                     .importDependencies(ScopeType.COMPILE, ScopeType.TEST, ScopeType.PROVIDED, ScopeType.RUNTIME, ScopeType.SYSTEM)
                      .resolve().withTransitivity().asResolvedArtifact();
 
                this.artifacts = Arrays.asList(artifacts);

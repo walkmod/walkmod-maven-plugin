@@ -52,13 +52,12 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>com.google.guava</groupId>
-				<artifactId>guava</artifactId>
-				<version>${version}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>${version}</version>
+		</dependency>
+	</dependencies>
 </project>
