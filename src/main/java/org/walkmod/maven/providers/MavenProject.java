@@ -1,6 +1,5 @@
 package org.walkmod.maven.providers;
 
-import com.google.common.base.Joiner;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -28,6 +27,8 @@ import org.jboss.shrinkwrap.resolver.api.maven.ScopeType;
 import org.jboss.shrinkwrap.resolver.api.maven.pom.ParsedPomFile;
 import org.jboss.shrinkwrap.resolver.impl.maven.MavenResolverSystemImpl;
 import org.walkmod.conf.ConfigurationException;
+
+import com.google.common.base.Joiner;
 
 public class MavenProject {
 
@@ -62,12 +63,11 @@ public class MavenProject {
       this(pomFile, new HashSet<MavenModule>(), new LocalMavenRepository(), true,
             Thread.currentThread().getContextClassLoader(), "");
    }
-   
+
    public MavenProject(File pomFile, String mvnArgs) {
       this(pomFile, new HashSet<MavenModule>(), new LocalMavenRepository(), true,
             Thread.currentThread().getContextClassLoader(), mvnArgs);
    }
-
 
    private Model getModel(File pom) throws ConfigurationException {
       try {
@@ -159,9 +159,9 @@ public class MavenProject {
          List<String> aux = new LinkedList<String>(Arrays.asList(mvnArgs));
          aux.addAll(Arrays.asList(extraMvnArgs));
          Iterator<String> it = aux.iterator();
-         while(it.hasNext()){
+         while (it.hasNext()) {
             String item = it.next().trim();
-            if(item.equals("")){
+            if (item.equals("")) {
                it.remove();
             }
          }
@@ -264,10 +264,11 @@ public class MavenProject {
                mrs.getMavenWorkingSession().useLegacyLocalRepository(true);
 
                MavenResolvedArtifact[] artifacts = mrs.loadPomFromFile(pomFile)
-                     .importDependencies(ScopeType.COMPILE, ScopeType.TEST, ScopeType.PROVIDED, ScopeType.RUNTIME, ScopeType.SYSTEM)
+                     .importDependencies(ScopeType.COMPILE, ScopeType.TEST, ScopeType.PROVIDED, ScopeType.RUNTIME)
                      .resolve().withTransitivity().asResolvedArtifact();
 
                this.artifacts = Arrays.asList(artifacts);
+
             } else {
                this.artifacts = new LinkedList<MavenResolvedArtifact>();
             }
@@ -277,6 +278,24 @@ public class MavenProject {
          throw new ConfigurationException("The pom.xml file at [" + pomFile.getAbsolutePath() + "] does not exists");
       }
 
+   }
+
+   private List<String> getSystemDeps() {
+      List<String> systemDeps = new LinkedList<String>();
+      Model pom = getModel(pomFile);
+      List<Dependency> localDeps = pom.getDependencies();
+
+      if (localDeps != null) {
+         Iterator<Dependency> it = localDeps.iterator();
+
+         while (it.hasNext()) {
+            Dependency aux = it.next();
+            if ("system".equals(aux.getScope())) {
+               systemDeps.add(aux.getSystemPath());
+            }
+         }
+      }
+      return systemDeps;
    }
 
    public URLClassLoader resolveClassLoader() throws Exception {
@@ -289,6 +308,7 @@ public class MavenProject {
       String[] bootPath = System.getProperties().get("sun.boot.class.path").toString()
             .split(Character.toString(File.pathSeparatorChar));
 
+      classPathEntries.addAll(getSystemDeps());
       List<MavenResolvedArtifact> artifacts = getArtifacts();
 
       if (artifacts != null) {
