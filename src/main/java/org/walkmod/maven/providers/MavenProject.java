@@ -174,7 +174,7 @@ public class MavenProject {
 
    public void build() throws Exception {
       if (requiresCompilation) {
-
+         
          Model model = getModel();
          Parent parent = model.getParent();
          int code;
@@ -207,18 +207,48 @@ public class MavenProject {
                System.setProperty("user.dir", previousDir);
             } else {
                path = pom.getBaseDirectory().getAbsolutePath();
-               code = MavenCli.doMain(mvnArgs, myClassWorld);
+               if (existsMvnCommand()) {
+                  code = execMvnCommand(mvnArgs, path);
+               } else {
+
+                  code = MavenCli.doMain(mvnArgs, myClassWorld);
+               }
             }
 
          } else {
             path = pom.getBaseDirectory().getAbsolutePath();
-            code = MavenCli.doMain(mvnArgs, myClassWorld);
+            if (existsMvnCommand()) {
+               code = execMvnCommand(mvnArgs, path);
+            } else {
+               code = MavenCli.doMain(mvnArgs, myClassWorld);
+            }
 
          }
          if (code != 0) {
             throw new Exception("Error executing: mvn " + Joiner.on(" ").join(mvnArgs) + " in " + path);
          }
       }
+   }
+   private boolean existsMvnCommand() {
+      Process p = null;
+      int code = -1;
+      try {
+         p = Runtime.getRuntime().exec(new String[] { "mvn", "-version" });
+         code =  p.waitFor();
+      } catch (Exception e) {
+      }
+      return code == 0;
+   }
+   
+   private int execMvnCommand(String[] mvnArgs, String path) throws Exception {
+      path = pom.getBaseDirectory().getAbsolutePath();
+      String[] command = new String[mvnArgs.length + 1];
+      command[0] = "mvn";
+      for (int i = 0; i < mvnArgs.length; i++) {
+         command[i + 1] = mvnArgs[i];
+      }
+      Process p = Runtime.getRuntime().exec(command, null, new File(path));
+      return p.waitFor();
    }
 
    public Model getModel() {
