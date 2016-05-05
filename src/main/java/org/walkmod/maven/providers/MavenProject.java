@@ -12,9 +12,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.maven.cli.MavenCli;
 import org.apache.maven.model.Dependency;
@@ -200,19 +198,18 @@ public class MavenProject {
             File parentPomFile = new File(new File(path), "pom.xml");
             if (parentPomFile.exists()) {
                String moduleName = pom.getArtifactId();
-
                mvnArgs = addExtraArgs(new String[] { "clean", "install", "-pl", ":" + moduleName, "-am", "-DskipTests",
                      "-DskipWalkmod" }, extraMvnArgs);
-
                if (existsMvnCommand()) {
                   code = execMvnCommand(mvnArgs, path);
                } else {
+
                   String previousDir = System.getProperty("user.dir");
                   System.setProperty("user.dir", path);
+
                   code = MavenCli.doMain(mvnArgs, myClassWorld);
                   System.setProperty("user.dir", previousDir);
                }
-
             } else {
                path = pom.getBaseDirectory().getAbsolutePath();
                if (existsMvnCommand()) {
@@ -239,39 +236,15 @@ public class MavenProject {
    }
 
    private boolean existsMvnCommand() {
-
-      boolean result = false;
+      Process p = null;
+      int code = -1;
       try {
-         ProcessBuilder pb = new ProcessBuilder("mvn", "-version");
-         
-         Process p = pb.start();
-         waitFor(p,5000, TimeUnit.MILLISECONDS);
-        result = true;
+         p = Runtime.getRuntime().exec(new String[] { "mvn", "-version" });
+         code = p.waitFor();
       } catch (Exception e) {
-        
       }
-      return result;
+      return code == 0;
    }
-   
-   public boolean waitFor(Process p, long timeout, TimeUnit unit)
-         throws InterruptedException
-     {
-         long startTime = System.nanoTime();
-         long rem = unit.toNanos(timeout);
-
-         do {
-             try {
-                 p.exitValue();
-                 return true;
-             } catch(IllegalThreadStateException ex) {
-                 if (rem > 0)
-                     Thread.sleep(
-                         Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
-             }
-             rem = unit.toNanos(timeout) - (System.nanoTime() - startTime);
-         } while (rem > 0);
-         return false;
-     }
 
    private int execMvnCommand(String[] mvnArgs, String path) throws Exception {
       path = pom.getBaseDirectory().getAbsolutePath();

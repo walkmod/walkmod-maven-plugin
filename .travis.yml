@@ -1,8 +1,5 @@
 language: java
 sudo: required
-before_script:
-  - sudo apt-get update
-  - sudo apt-get install mvn
 jdk:
   - oraclejdk8
   - oraclejdk7
@@ -10,4 +7,4 @@ jdk:
 install:
   - mvn package -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script:
-  - mvn test
+  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true
