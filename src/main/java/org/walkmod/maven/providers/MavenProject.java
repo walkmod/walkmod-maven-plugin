@@ -200,13 +200,19 @@ public class MavenProject {
             File parentPomFile = new File(new File(path), "pom.xml");
             if (parentPomFile.exists()) {
                String moduleName = pom.getArtifactId();
-               String previousDir = System.getProperty("user.dir");
-               System.setProperty("user.dir", path);
 
                mvnArgs = addExtraArgs(new String[] { "clean", "install", "-pl", ":" + moduleName, "-am", "-DskipTests",
                      "-DskipWalkmod" }, extraMvnArgs);
-               code = MavenCli.doMain(mvnArgs, myClassWorld);
-               System.setProperty("user.dir", previousDir);
+
+               if (existsMvnCommand()) {
+                  code = execMvnCommand(mvnArgs, path);
+               } else {
+                  String previousDir = System.getProperty("user.dir");
+                  System.setProperty("user.dir", path);
+                  code = MavenCli.doMain(mvnArgs, myClassWorld);
+                  System.setProperty("user.dir", previousDir);
+               }
+
             } else {
                path = pom.getBaseDirectory().getAbsolutePath();
                if (existsMvnCommand()) {
@@ -237,13 +243,35 @@ public class MavenProject {
       boolean result = false;
       try {
          ProcessBuilder pb = new ProcessBuilder("mvn", "-version");
-         pb.start();
-         pb.wait(5000);
-         result = true;
+         
+         Process p = pb.start();
+         p.waitFor(5000, TimeUnit.MILLISECONDS);
+        result = true;
       } catch (Exception e) {
+        
       }
       return result;
    }
+   
+   public boolean waitFor(Process p, long timeout, TimeUnit unit)
+         throws InterruptedException
+     {
+         long startTime = System.nanoTime();
+         long rem = unit.toNanos(timeout);
+
+         do {
+             try {
+                 p.exitValue();
+                 return true;
+             } catch(IllegalThreadStateException ex) {
+                 if (rem > 0)
+                     Thread.sleep(
+                         Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
+             }
+             rem = unit.toNanos(timeout) - (System.nanoTime() - startTime);
+         } while (rem > 0);
+         return false;
+     }
 
    private int execMvnCommand(String[] mvnArgs, String path) throws Exception {
       path = pom.getBaseDirectory().getAbsolutePath();
