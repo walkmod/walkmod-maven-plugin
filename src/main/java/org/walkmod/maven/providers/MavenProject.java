@@ -235,11 +235,31 @@ public class MavenProject {
       boolean result = false;
       try {
          p = Runtime.getRuntime().exec(new String[] { "mvn", "-version" });
-         result = p.waitFor(5000, TimeUnit.MILLISECONDS);
+         result = waitFor(p, 5000, TimeUnit.MILLISECONDS);
       } catch (Exception e) {
       }
       return result;
    }
+   
+   private boolean waitFor(Process p, long timeout, TimeUnit unit)
+         throws InterruptedException
+     {
+         long startTime = System.nanoTime();
+         long rem = unit.toNanos(timeout);
+
+         do {
+             try {
+                 p.exitValue();
+                 return true;
+             } catch(IllegalThreadStateException ex) {
+                 if (rem > 0)
+                     Thread.sleep(
+                         Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
+             }
+             rem = unit.toNanos(timeout) - (System.nanoTime() - startTime);
+         } while (rem > 0);
+         return false;
+     }
    
    private int execMvnCommand(String[] mvnArgs, String path) throws Exception {
       path = pom.getBaseDirectory().getAbsolutePath();
