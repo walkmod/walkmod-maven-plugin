@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.maven.cli.MavenCli;
 import org.apache.maven.model.Dependency;
@@ -231,13 +232,13 @@ public class MavenProject {
    }
    private boolean existsMvnCommand() {
       Process p = null;
-      int code = -1;
+      boolean result = false;
       try {
          p = Runtime.getRuntime().exec(new String[] { "mvn", "-version" });
-         code =  p.waitFor();
+         result = p.waitFor(5000, TimeUnit.MILLISECONDS);
       } catch (Exception e) {
       }
-      return code == 0;
+      return result;
    }
    
    private int execMvnCommand(String[] mvnArgs, String path) throws Exception {
