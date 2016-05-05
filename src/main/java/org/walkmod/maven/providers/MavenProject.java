@@ -245,7 +245,7 @@ public class MavenProject {
          ProcessBuilder pb = new ProcessBuilder("mvn", "-version");
          
          Process p = pb.start();
-         p.waitFor(5000, TimeUnit.MILLISECONDS);
+         waitFor(p,5000, TimeUnit.MILLISECONDS);
         result = true;
       } catch (Exception e) {
         
