@@ -1,5 +1,8 @@
 language: java
 sudo: required
+before_script:
+  - sudo apt-get update
+  - sudo apt-get install mvn
 jdk:
   - oraclejdk8
   - oraclejdk7
