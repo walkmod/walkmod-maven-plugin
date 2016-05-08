@@ -26,107 +26,106 @@ import org.walkmod.conf.entities.impl.ConfigurationImpl;
 
 public class ClassLoaderConfigurationProviderTest {
 
-   @Test
-   public void testeable() {
-      Assert.assertTrue(true);
-   }
+	@Test
+	public void testeable() {
+		Assert.assertTrue(true);
+	}
 
-   @Test
-   public void testResolveShouldRetrievePomDependencies() throws Exception {
-      File pom = new File("pom.xml");
-      Assert.assertTrue(pom.exists());
-      MavenProject reader = new MavenProject(pom);
-      List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
-      Assert.assertFalse(dependencies.isEmpty());
-   }
+	@Test
+	public void testResolveShouldRetrievePomDependencies() throws Exception {
+		File pom = new File("pom.xml");
+		Assert.assertTrue(pom.exists());
+		MavenProject reader = new MavenProject(pom);
+		List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
+		Assert.assertFalse(dependencies.isEmpty());
+	}
 
-   @Test
-   public void testClassLoaderFromModuleProject() throws Exception {
-      File pom = new File("src/test/sample/test/pom.xml");
-      Assert.assertTrue(pom.exists());
-      String aux = System.getProperty("user.dir");
-      try {
-         System.setProperty("user.dir", pom.getParentFile().getAbsolutePath());
-         MavenProject reader = new MavenProject(new File("pom.xml"));
-         reader.build();
-         List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
-         Assert.assertFalse(dependencies.isEmpty());
-      } finally {
-         System.setProperty("user.dir", aux);
+	@Test
+	public void testClassLoaderFromModuleProject() throws Exception {
+		File pom = new File("src/test/sample/test/pom.xml");
+		Assert.assertTrue(pom.exists());
+		String aux = System.getProperty("user.dir");
+		try {
+			System.setProperty("user.dir", pom.getParentFile().getAbsolutePath());
+			MavenProject reader = new MavenProject(new File("pom.xml"));
+			reader.build();
+			List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
+			Assert.assertFalse(dependencies.isEmpty());
+		} finally {
+			System.setProperty("user.dir", aux);
 
-      }
-   }
+		}
+	}
 
-   @Test
-   public void testClassLoaderFromProjectWithParentProject() throws Exception {
-      File pom = new File("src/test/sample2/pom.xml");
-      Assert.assertTrue(pom.exists());
-      String aux = System.getProperty("user.dir");
-      try {
-         System.setProperty("user.dir", pom.getParentFile().getAbsolutePath());
-         MavenProject reader = new MavenProject(new File("pom.xml"));
-         reader.build();
-         List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
-         Assert.assertFalse(dependencies.isEmpty());
-      } finally {
-         System.setProperty("user.dir", aux);
+	@Test
+	public void testClassLoaderFromProjectWithParentProject() throws Exception {
+		File pom = new File("src/test/sample2/pom.xml");
+		Assert.assertTrue(pom.exists());
+		String aux = System.getProperty("user.dir");
+		try {
+			System.setProperty("user.dir", pom.getParentFile().getAbsolutePath());
+			MavenProject reader = new MavenProject(new File("pom.xml"));
+			reader.build();
+			List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
+			Assert.assertFalse(dependencies.isEmpty());
+		} finally {
+			System.setProperty("user.dir", aux);
 
-      }
-   }
+		}
+	}
 
-   @Test
-   public void testAvoidRecursiveExecutions() throws Exception {
-      File pom = new File("src/test/recursive");
-      String aux = System.getProperty("user.dir");
-      try {
-         System.setProperty("user.dir", pom.getAbsolutePath());
+	@Test
+	public void testAvoidRecursiveExecutions() throws Exception {
+		File pom = new File("src/test/recursive");
+		String aux = System.getProperty("user.dir");
+		try {
+			System.setProperty("user.dir", pom.getAbsolutePath());
 
-         ClassLoaderConfigurationProvider reader = new ClassLoaderConfigurationProvider();
-         Configuration conf = new ConfigurationImpl();
-         conf.setClassLoader(Thread.currentThread().getContextClassLoader());
-         reader.init(conf);
-         reader.load();
-         Assert.assertNotNull(conf.getParameters().get("classLoader"));
-      } finally {
-         System.setProperty("user.dir", aux);
+			ClassLoaderConfigurationProvider reader = new ClassLoaderConfigurationProvider();
+			Configuration conf = new ConfigurationImpl();
+			conf.setClassLoader(Thread.currentThread().getContextClassLoader());
+			reader.init(conf);
+			reader.load();
+			Assert.assertNotNull(conf.getParameters().get("classLoader"));
+		} finally {
+			System.setProperty("user.dir", aux);
 
-      }
-   }
+		}
+	}
 
-   @Test
-   public void testClassLoaderFromProjectWithParentProjectInSubfolder() throws Exception {
-      File pom = new File("src/test/sample3/child/pom.xml");
-      Assert.assertTrue(pom.exists());
-      String aux = System.getProperty("user.dir");
-      try {
-         System.setProperty("user.dir", pom.getParentFile().getAbsolutePath());
-        
-         MavenProject reader = new MavenProject(new File("pom.xml"));
-         reader.build();
-         List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
-         Assert.assertTrue(dependencies.isEmpty());
-      } finally {
-         System.setProperty("user.dir", aux);
+	@Test
+	public void testClassLoaderFromProjectWithParentProjectInSubfolder() throws Exception {
+		File pom = new File("src/test/sample3/child/pom.xml");
+		Assert.assertTrue(pom.exists());
+		String aux = System.getProperty("user.dir");
+		try {
+			System.setProperty("user.dir", pom.getParentFile().getAbsolutePath());
 
-      }
-   }
-   
-  
-   public void testExtraMvnArgs() throws Exception{
-      File pom = new File("src/test/sample4/pom.xml");
-      Assert.assertTrue(pom.exists());
-      String aux = System.getProperty("user.dir");
-      try {
-         System.setProperty("user.dir", pom.getParentFile().getAbsolutePath());
-        
-         MavenProject reader = new MavenProject(new File("pom.xml"), "-Dversion=11.0 -Drelease=0");
-         reader.build();
-         List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
-         Assert.assertTrue(dependencies.isEmpty());
-      } finally {
-         System.setProperty("user.dir", aux);
+			MavenProject reader = new MavenProject(new File("pom.xml"));
+			reader.build();
+			List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
+			Assert.assertTrue(dependencies.isEmpty());
+		} finally {
+			System.setProperty("user.dir", aux);
 
-      }
-   }
+		}
+	}
+
+	public void testExtraMvnArgs() throws Exception {
+		File pom = new File("src/test/sample4/pom.xml");
+		Assert.assertTrue(pom.exists());
+		String aux = System.getProperty("user.dir");
+		try {
+			System.setProperty("user.dir", pom.getParentFile().getAbsolutePath());
+
+			MavenProject reader = new MavenProject(new File("pom.xml"), "-Dversion=11.0 -Drelease=0");
+			reader.build();
+			List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
+			Assert.assertTrue(dependencies.isEmpty());
+		} finally {
+			System.setProperty("user.dir", aux);
+
+		}
+	}
 
 }
