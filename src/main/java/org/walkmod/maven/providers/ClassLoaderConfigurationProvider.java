@@ -79,6 +79,7 @@ public class ClassLoaderConfigurationProvider implements ConfigurationProvider {
 			MavenProject mvnProject = new MavenProject(pomFile,
 					new HashSet<MavenModule>(), localRepo, isCompile(),
 					cl, mavenArgs);
+			mvnProject.clean();
 			try {
 				configuration.getParameters().put("classLoader",
 						mvnProject.resolveClassLoader());

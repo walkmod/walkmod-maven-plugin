@@ -47,6 +47,8 @@ public class MavenProject {
 	private boolean requiresCompilation = true;
 
 	private String mvnArgs;
+	
+	private static Set<MavenModule> compiledModules = new HashSet<MavenModule>();
 
 	public MavenProject(File pomFile, Set<MavenModule> modules, LocalMavenRepository localRepo,
 			boolean requiresCompilation, ClassLoader cl, String mvnArgs) {
@@ -57,6 +59,22 @@ public class MavenProject {
 		this.cl = cl;
 		this.requiresCompilation = requiresCompilation;
 		this.mvnArgs = mvnArgs;
+	}
+	
+	public void markAsCompiled(MavenModule module){
+	   compiledModules.add(module);
+	}
+	
+	public boolean isCompiled(MavenModule module){
+	   return compiledModules.contains(module);
+	}
+	
+	public void clean(){
+	   compiledModules.clear();
+	}
+	
+	public Set<MavenModule> getCompiledModules(){
+	   return compiledModules;
 	}
 
 	public MavenProject(File pomFile) {

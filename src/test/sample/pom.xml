@@ -22,6 +22,7 @@
     <modules>
         <module>api</module>
         <module>test</module>
+        <module>test2</module>
     </modules>
 
 </project>

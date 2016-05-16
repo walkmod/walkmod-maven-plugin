@@ -7,64 +7,70 @@ import org.walkmod.conf.ConfigurationException;
 
 public class MavenModule {
 
-	private String name;
-	private Model mavenModel;
-	private File directory;
-	private MavenProject loader;
-	private boolean compiled = false;
-	private boolean submodulesProcessed = false;
+   private String name;
+   private Model mavenModel;
+   private File directory;
+   private MavenProject loader;
+   private boolean submodulesProcessed = false;
 
-	public MavenModule(String name, Model mavenModel, File directory,
-			MavenProject loader) {
-		this.name = name;
-		this.mavenModel = mavenModel;
-		this.directory = directory;
-		this.loader = loader;
-	}
-	
-	public String getName(){
-		return name;
-	}
+   public MavenModule(String name, Model mavenModel, File directory, MavenProject loader) {
+      this.name = name;
+      this.mavenModel = mavenModel;
+      this.directory = directory;
+      this.loader = loader;
+   }
 
-	public String getArtifactId() {
-		return mavenModel.getArtifactId();
-	}
+   public String getName() {
+      return name;
+   }
 
-	public String getGroupId() {
-		if (mavenModel.getGroupId() == null) {
-			return mavenModel.getParent().getGroupId();
-		}
-		return mavenModel.getGroupId();
-	}
-	
-	public File getDirectory(){
-		return directory;
-	}
+   public String getArtifactId() {
+      return mavenModel.getArtifactId();
+   }
 
-	public String name() {
-		return name;
-	}
+   public String getGroupId() {
+      if (mavenModel.getGroupId() == null) {
+         return mavenModel.getParent().getGroupId();
+      }
+      return mavenModel.getGroupId();
+   }
 
-	public void compile() throws Exception {
-		if (!compiled) {
-			loader.build();
-		}
-		compiled = true;
-	}
+   public File getDirectory() {
+      return directory;
+   }
 
-	public void loadSubmodules() throws ConfigurationException {
-		if (!submodulesProcessed) {
-			loader.lookUpSubmodules();
-		}
-		submodulesProcessed = true;
-	}
+   public String name() {
+      return name;
+   }
 
-	@Override
-	public boolean equals(Object o) {
-		if (o instanceof MavenModule) {
-			return getGroupId().equals(((MavenModule) o).getGroupId())
-					&& getArtifactId().equals(((MavenModule) o).getArtifactId());
-		}
-		return false;
-	}
+   public void compile() throws Exception {
+      if (!loader.isCompiled(this)) {
+         loader.build();
+         loader.markAsCompiled(this);
+      }
+
+   }
+
+   public void loadSubmodules() throws ConfigurationException {
+      if (!submodulesProcessed) {
+         loader.lookUpSubmodules();
+      }
+      submodulesProcessed = true;
+   }
+
+   @Override
+   public boolean equals(Object o) {
+      if (o instanceof MavenModule) {
+
+         return getGroupId().equals(((MavenModule) o).getGroupId())
+               && getArtifactId().equals(((MavenModule) o).getArtifactId());
+      }
+      return false;
+   }
+
+   @Override
+   public int hashCode() {
+
+      return getArtifactId().hashCode()+getGroupId().hashCode();
+   }
 }

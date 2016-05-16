@@ -127,5 +127,41 @@ public class ClassLoaderConfigurationProviderTest {
 
 		}
 	}
+	
+	@Test
+	public void testAvoidMultipleCompilations() throws Exception{
+	   File pom = new File("src/test/sample/test/pom.xml");
+      Assert.assertTrue(pom.exists());
+      String aux = System.getProperty("user.dir");
+      MavenProject reader = null;
+      try {
+         System.setProperty("user.dir", pom.getParentFile().getAbsolutePath());
+         reader = new MavenProject(new File("pom.xml"));
+         reader.build();
+         List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
+         Assert.assertFalse(dependencies.isEmpty());
+         Assert.assertEquals(1,reader.getCompiledModules().size());
+         
+         
+      } finally {
+         System.setProperty("user.dir", aux);
+
+      }
+       pom = new File("src/test/sample/test2/pom.xml");
+    
+      Assert.assertTrue(pom.exists());
+       aux = System.getProperty("user.dir");
+      try {
+         System.setProperty("user.dir", pom.getParentFile().getAbsolutePath());
+         reader = new MavenProject(new File("pom.xml"));
+         reader.build();
+         List<MavenResolvedArtifact> dependencies = reader.getArtifacts();
+         Assert.assertFalse(dependencies.isEmpty());
+         Assert.assertEquals(1,reader.getCompiledModules().size());
+      } finally {
+         System.setProperty("user.dir", aux);
+
+      }
+	}
 
 }
