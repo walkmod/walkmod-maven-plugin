@@ -255,12 +255,8 @@ public class MavenProject {
 	}
 	
 	private String getComand(){
-		String os = System.getProperty("os.name").toLowerCase();
-		String command = "mvn";
-		if (os.contains("win")) {
-			command += ".cmd";
-		}
-		return command;
+
+		return MavenCommand.getCommand();
 	}
 
 	private boolean existsMvnCommand() {
